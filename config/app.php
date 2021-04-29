@@ -190,7 +190,7 @@ return [
         App\Providers\RouteServiceProvider::class,
 
         //My providers      
-        Maatwebsite\Excel\ExcelServiceProvider::class,
+       
         'Barryvdh\Debugbar\ServiceProvider',
      
         Barryvdh\DomPDF\ServiceProvider::class,
@@ -244,8 +244,7 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
 
-        //my aliase
-        'Excel' => Maatwebsite\Excel\Facades\Excel::class,
+        //my aliase      
         'Debugbar' => 'Barryvdh\Debugbar\Facade',        
         'PDF' => Barryvdh\DomPDF\Facade::class,
     ],
