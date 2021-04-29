@@ -192,7 +192,7 @@ return [
         //My providers      
         Maatwebsite\Excel\ExcelServiceProvider::class,
         'Barryvdh\Debugbar\ServiceProvider',
-        Yajra\DataTables\DataTablesServiceProvider::class,
+     
         Barryvdh\DomPDF\ServiceProvider::class,
 
     ],
@@ -246,8 +246,7 @@ return [
 
         //my aliase
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
-        'Debugbar' => 'Barryvdh\Debugbar\Facade',
-        'DataTables' => Yajra\DataTables\Facades\DataTables::class,
+        'Debugbar' => 'Barryvdh\Debugbar\Facade',        
         'PDF' => Barryvdh\DomPDF\Facade::class,
     ],
 
