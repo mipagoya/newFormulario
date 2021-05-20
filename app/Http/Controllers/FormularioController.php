@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Form;
 use Carbon\Carbon;
+use nusoap_client;
 use App\User;
 use DB;
 
@@ -19,21 +20,14 @@ class FormularioController extends Controller
     public function __construct() {               
           
         $this->_fechaActual = Carbon::now();
-
-        $this->_parameterUser = [
-            'usuario'		=>	'blu.logistics@blulogistics.com',
-            'contrasena'	=>	'blu.2018'
-        ];        
+    
     }
 
-    function linkInvalid(){
-        // $user = User::all();
-        // dd($user);
+    function linkInvalid(){        
         return view('form/linkNoValido');
     }
 
-    function linkPay(Request $request){
-       //dd(isset($request->id));
+    function linkPay(Request $request){       
         if(!isset($request->id)){
             return view('form/linkNoValido');
         }
@@ -51,42 +45,76 @@ class FormularioController extends Controller
     }
 
     function processesPay(Request $request){
-        dd($request->all());
+
+        //dd($request->all());
+       $terminos = $request->terminos;
+
+       if($terminos =="on"){
+           $PGtrasaccion = new Form\Transaccion();
+           $idTransaccion = $PGtrasaccion->insetPGTrans($request);
+
+           if($idTransaccion != "ERROR"){
+                $PGtrasaccionDetalle = new Form\TransaccionDetalle();
+                $idTransaccionDetalle = $PGtrasaccionDetalle->insetPGTransDetalle($request,$idTransaccion);
+                if($idTransaccionDetalle !=  "ERROR"){
+                   $resultWs = $this->sendWSPaafo($request,$idTransaccion);
+
+                   if($resultWs != false){
+                        $resultArrayWS = var_export($resultWs,true); //Captura respuesta VPN
+                    
+                        $PGtrasaccionHistoria = new Form\TransaccionHistoria();
+                        $insertPGtrasaccionHistoria = $PGtrasaccionHistoria->InsertTransaccionHistoria($resultArrayWS,$idTransaccion);
+
+                   }else{
+
+                    $updateEstado = Form\Transaccion::where('id',$idTransaccion)->update(['estado_transacion' =>'NO_CONEXION']);
+                       return "NO_CONEXION";
+                   }
+                }
+           }
+
+           return $insertPGtrasaccion;
+       }
+
     }
 
 
-    public  function wsAgenciamientoAduanero($metodo,$parametros){
+    private  function sendWSPaafo($request,$idTransaccion){
                
-        $this->_SERVICE_URL='http://190.60.219.151/LRPWS/agenciamientoaduanero/WSAgenciamientoAduanero.svc?wsdl';   
+        $certificado = app_path(). '/cert/certificate.crt';
+		$certificadoKey = app_path(). '/cert/certificateKey.key';
 
-        try{
-
-           $cliente = new \SoapClient($this->_SERVICE_URL);   
-            
-        //  dd($cliente->__getFunctions());
-       dd($cliente->__getTypes());
-        //dd($parametros);
-           $respuestaWS = $cliente->$metodo($parametros); 
-           //dd($respuestaWS);
-           return $respuestaWS;
+        $url = 'https://172.19.200.15/webservicevisa/autorizarcompra.asmx?wsdl';
+    
+        $client = new nusoap_client($url,'wsdl'); 
+      
+        $param=array(
+			'Usuario' 		=> "PAGOYAPAGOYA01",
+			'Clave' 		=> "PAGOYAPAGOYA01",
+			'NumTarjeta'	=> $request->ntarjeta,
+			'Mes' 			=> $request->mes,
+			'Ano' 			=> $request->anio,
+			'Monto' 		=> $request->monto,
+			'Iva' 			=> $request->iva,
+			'NumCuotas' 	=> $request->cuotas,
+			'CodReferencia' => $idTransaccion,
+			'TipoCuenta' 	=> $request->tCuenta,
+			'Franquicia' 	=> $request->Franquicia,
+			'CVV2' 			=> $request->cod,
+		);
         
-        }catch(SoapFault $fault){ 
-             echo 'Erro en el metodo '.$metodo .' del WS wsAgenciamientoAduanero ' .$fault; 
-        }
-
-    }
-
-    public function WSConsultarBitacoras(Request $request){
-        
-        //$metodo = $request->url;       
-        $metodo = 'WSConsultarBitacoras';
-        $tipoConsulta = 2;  // Parametro se recibe desde consulta     
-
-        $parametros = [
-            'tipoConsulta'=> $tipoConsulta
-        ];
-          
-        $respuestaWS = $this->wsAgenciamientoAduanero($metodo,array_merge($this->_parameterUser,$parametros)); 
-    dd( $respuestaWS);
+		$client->setCredentials("","","certificate",
+		    array(
+		          "sslcertfile"  => $certificado,
+		          "sslkeyfile"  => $certificadoKey,
+		          "passphrase"  => "convenios",
+		          "verifypeer"  => 0, //OPTIONAL
+		          "verifyhost"  => 0   //OPTIONAL
+		    )
+        ); 
+       
+        $resultado = $client->call('AuthorizeCVV2', $param);
+       // dd($resultado);
+        return $resultado; 
     }
 }

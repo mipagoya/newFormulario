@@ -4,24 +4,15 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>{{ config('app.name') }}</title>
-  <!-- Icons -->
   <link href="coreui/css/font-awesome.min.css" rel="stylesheet">
   <link href="coreui/css/simple-line-icons.min.css" rel="stylesheet">
-  <!-- Main styles for this application -->
   <link href="coreui/css/style.css" rel="stylesheet">
-  <style>
-    .fondo{ background-color: #021d24;}   
-  </style>
+  
 </head>
 <body style="background-color: #fff">
     <header class="navbar fondo">
-        <img src="imagenes_pagoya/logo.jpg">
-        {{-- <div>
-          <a href="{{('login')}}" class="btn btn-outline-info">Iniciar Sesión</a>
-          <a href="{{('register')}}" class="btn btn-outline-success">Registrarse</a>
-        </div> --}}
-    </header> 
-  
+        <img src="imagenes_pagoya/logo.jpg">       
+    </header>   
     <div class="container mt-5">
         <div class="row justify-content-center ">
             <div class="mt-5">
@@ -38,9 +29,5 @@
             </div>
         </div>
     </div>
-
-
-
-
 </body>
 </html>

@@ -60,10 +60,8 @@ return [
     */
 
     //'url' => env('APP_URL', 'http://localhost'),
-    //'url' => 'http://localhost', // LOCAL
-    //'url' => 'http://10.5.0.231', // TEST Privada
-    //'url' => 'http://test.aduanasblulogistics.com.co/', // TEST PÚBLICA
-    'url' => 'http://agenciadeaduanas.blulogistics.net', // TEST PÚBLICA
+    
+    'url' => 'https://formulario.pagoya.com.co', // TEST PÚBLICA
 	//'url' => $url,
     /*
     |--------------------------------------------------------------------------

@@ -4,16 +4,11 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>{{ config('app.name') }}</title>
-  <!-- Icons -->
+
   <link href="coreui/css/font-awesome.min.css" rel="stylesheet">
   <link href="coreui/css/simple-line-icons.min.css" rel="stylesheet">
-  <!-- Main styles for this application -->
   <link href="coreui/css/style.css" rel="stylesheet">
-  <style>
-      .fondo{
-        background-color: #021d24;
-      }   
-  </style>
+ 
 </head>
 <body style="background-color: #fff">
     <header class="navbar fondo">
@@ -22,7 +17,11 @@
     @php
         $item = $links[0];
     @endphp
-    <div class="row" style="padding: 5px 4em">  {{ csrf_field() }}       
+    <div class="row" style="padding: 5px 4em">
+        <input type="hidden" id="id_producto" value="{{$item->id}}">
+        <input type="hidden" id="monto" value="{{$item->valor_total}}">
+        <input type="hidden" id="iva" value="{{$item->impuesto}}">
+        {{ csrf_field() }}       
         <div class="col-sm-7" style="background-color: #F2F3F4">
             <div class="row border">
                 <div class="col-sm-12">           
@@ -69,8 +68,14 @@
                                 <option value="3">Credito</option>    
                             </select>    
                         </div>   
-                        <div class="col-sm-4"> 
-                            <label for="cuotas">Número de cuotas</label>        
+                        <div class="col-sm-2"> 
+                            <label for="Franquicia">Franquicia</label>        
+                            <select id="Franquicia" class="form-control">       
+                                <option value="90">Visa</option> 
+                            </select>    
+                        </div>   
+                        <div class="col-sm-2"> 
+                            <label for="cuotas">Cuotas</label>        
                             <select id="cuotas" class="form-control">       
                                 <option value="1">1</option>    
                                 <option value="2">2</option>    
@@ -109,19 +114,18 @@
                         <div class="col-sm-4"> 
                             <label for="anio">Año</label> 
                             <select id="anio" class="form-control">
-                                <option value="2021">2021</option>
-                                <option value="2022">2022</option>
-                                <option value="2023">2023</option>
-                                <option value="2024">2024</option>
-                                <option value="2025">2025</option>
-                                <option value="2026">2026</option>
-                                <option value="2027">2027</option>
-                                <option value="2028">2028</option>
-                                <option value="2029">2029</option>
-                                <option value="2030">2030</option>
-                                <option value="2031">2031</option>
-                                <option value="2032">2032</option>
-                              
+                                <option value="21">2021</option>
+                                <option value="22">2022</option>
+                                <option value="23">2023</option>
+                                <option value="24">2024</option>
+                                <option value="25">2025</option>
+                                <option value="26">2026</option>
+                                <option value="27">2027</option>
+                                <option value="28">2028</option>
+                                <option value="29">2029</option>
+                                <option value="30">2030</option>
+                                <option value="31">2031</option>
+                                <option value="32">2032</option>                              
                             </select>       
                             </div> 
                         <div class="col-sm-4"> 
@@ -163,15 +167,14 @@
             </div>            
         </div>        
     </div> 
-    <script src="coreui/js/jquery.min.js"></script>
+    <script src="coreui/js/jquery.3.6.js"></script>
     <script src="coreui/js/popper.min.js"></script>
     <script src="coreui/js/bootstrap.min.js"></script> 
     <script src="coreui/js/funtioInit.js"></script> 
     
 <script>
     
-    $(".requerido").blur(function(){            
-        //$("#divResultado").html('');  
+    $(".requerido").blur(function(){  
         let id = this.id;       
             $("#"+id+"").removeClass('border border-danger');       
             if($("#"+id+"").val() == ""){
@@ -312,22 +315,36 @@
 
         if(obligatorio == 0){
             let data = {
-                nombre:     $("#nombre").val(),
-                apellido:   $("#apellido").val(),
-                documento:  $("#documento").val(),
-                tDoc:       $("#tDoc").val(),
-                telefono:   $("#telefono").val(),
-                correo:     $("#correo").val(),
-                tCuenta:    $("#tCuenta").val(),
-                cuotas:     $("#cuotas").val(),          
-                ntarjeta:   $("#ntarjeta").val(),
-                mes:        $("#mes").val(),
-                anio:       $("#anio").val(),
-                cod:        $("#cod").val(),
-                terminos:   $("#terminos").val()
+                nombre:         $("#nombre").val(),
+                apellido:       $("#apellido").val(),
+                documento:      $("#documento").val(),
+                tDoc:           $("#tDoc").val(),
+                telefono:       $("#telefono").val(),
+                correo:         $("#correo").val(),
+                tCuenta:        $("#tCuenta").val(),
+                cuotas:         $("#cuotas").val(),          
+                ntarjeta:       $("#ntarjeta").val(),
+                mes:            $("#mes").val(),
+                anio:           $("#anio").val(),
+                cod:            $("#cod").val(),
+                terminos:       $("#terminos").val(),
+                id_producto:    $("#id_producto").val(),
+                Franquicia:     $("#Franquicia").val(),
+                monto:          $("#monto").val(),
+                iva:            $("#iva").val()
+
             };
-            console.log(data);
+            //console.log(data);
+            $("#pagar").prop('disabled', true);
             let result = ajaxResultJsonIni('procesaPago','divResultado',data);
+            
+            if(result == "ERROR"){
+                $("#divResultado").html('<p class="text-danger">Ocurrio un error por favor comuniquese con el comercio</p>');
+            }else if(result == "NO_CONEXION"){
+                $("#divResultado").html('<p class="text-warning">El sistema no esta disponible por favor intentelo mas tarde</p>');
+            }else{
+                $("#divResultado").html('<p class="text-success">Pago realizado con exito</p>');
+            }
         }
     }
 </script>      
@@ -350,10 +367,10 @@
     <div class="row">
         <div class="col-sm-4"></div>
         <div class="col-sm-4"><span class="ml-auto">
-            <a target="_blank" class="pl-2" href="https://mipagoya.com/wp/wp-content/uploads/2020/03/5-Poli%cc%81tica-de-Tratamiento-de-Datos-Personales-Colombia.pdf">Políticas de privacidad</a>
+            <a target="_blank" class="pl-2" href="https://mipagoya.com/wp/wp-content/uploads/2020/03/5-Poli%cc%81tica-de-Tratamiento-de-Datos-Personales-Colombia.pdf" rel="noopener">Políticas de privacidad</a>
     </span>
     <span class="ml-auto">
-            <a target="_blank" class="pl-2" href="https://mipagoya.com/wp/wp-content/uploads/2020/03/Pol%c3%adticas-Pasarela-Agregadora.pdf">Términos y condiciones</a>
+            <a target="_blank" class="pl-2" href="https://mipagoya.com/wp/wp-content/uploads/2020/03/Pol%c3%adticas-Pasarela-Agregadora.pdf" rel="noopener">Términos y condiciones</a>
     </span></div>
         <div class="col-sm-4"></div>
     </div>
